@@ -129,7 +129,11 @@ function seek (toSeek = 0) {
  */
 function addTracks (itemID) {
 	log.debug("added track: ", itemID);
-	currentPlayingPlaylist = currentPlayingPlaylist.concat(itemID);
+	if (typeof currentPlayingPlaylist == 'undefined') {
+		currentPlayingPlaylist=itemID;
+	}else{
+		currentPlayingPlaylist = currentPlayingPlaylist.concat(itemID);
+	}
 }
 
 function nextTrack () {

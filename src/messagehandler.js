@@ -119,6 +119,14 @@ async function playThis (message) {
 async function addThis (message) {
 	const indexOfItemID = message.content.indexOf(CONFIG["discord-prefix"] + "add") + (CONFIG["discord-prefix"] + "add").length + 1;
 	const argument = message.content.slice(indexOfItemID);
+	const reply = new Discord.MessageEmbed()
+	.setColor(getRandomDiscordColor())
+	.addFields({
+		name: `${argument} added`,
+		value: ":white_check_mark:"
+	});
+	message.channel.send(reply);
+
 	let items;
 	// check if play command was used with itemID
 	const regexresults = checkJellyfinItemIDRegex(argument);
