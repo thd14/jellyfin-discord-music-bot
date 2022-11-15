@@ -6,8 +6,7 @@ const {
 } = require("./util");
 
 function getProgressString (percent) {
-	// the min with of the discord window allows for this many chars
-	const NUMBER_OF_CHARS = 12;
+	const NUMBER_OF_CHARS = 25;
 	let string = "";
 	for (let iX = 0; iX < NUMBER_OF_CHARS; iX++) {
 		if (percent > (iX) / NUMBER_OF_CHARS) {
