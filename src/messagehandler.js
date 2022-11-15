@@ -204,7 +204,7 @@ function handleChannelMessage (message) {
 			const errorMessage = getDiscordEmbedError(error);
 			message.channel.send(errorMessage);
 		}
-	} else if (message.content.startsWith(CONFIG["discord-prefix"] + "skip")) {
+	} else if (message.content.startsWith(CONFIG["discord-prefix"] + "skip") || message.content.startsWith(CONFIG["discord-prefix"] + "next")) {
 		try {
 			playbackmanager.nextTrack();
 		} catch (error) {
@@ -244,7 +244,7 @@ function handleChannelMessage (message) {
 				name: `${CONFIG["discord-prefix"]}seek`,
 				value: "Where to Seek to in seconds or MM:SS"
 			}, {
-				name: `${CONFIG["discord-prefix"]}skip`,
+				name: `${CONFIG["discord-prefix"]}skip and ${CONFIG["discord-prefix"]}next`,
 				value: "Skip this Song"
 			}, {
 				name: `${CONFIG["discord-prefix"]}spawn`,
