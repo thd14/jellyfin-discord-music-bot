@@ -340,7 +340,12 @@ async function getInfo(item){
 	const itemIdDetails = await jellyfinClientManager.getJellyfinClient().getItem(jellyfinClientManager.getJellyfinClient().getCurrentUserId(), item);
 	return `${itemIdDetails.Name} by ${itemIdDetails.Artists[0] || "VA"} \n `
 }
-
+function getcurrentPlayingPlaylist(){
+	console.log(currentPlayingPlaylist)
+	if(typeof currentPlayingPlaylist !== 'undefined'){
+		return currentPlayingPlaylist;
+	}
+}
 
 module.exports = {
 	startPlaying,
@@ -355,5 +360,6 @@ module.exports = {
 	addTracks,
 	getPostitionTicks,
 	spawnPlayMessage,
-	showList
+	showList,
+	getcurrentPlayingPlaylist
 };

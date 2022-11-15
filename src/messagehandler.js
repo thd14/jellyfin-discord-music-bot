@@ -1,5 +1,6 @@
 const CONFIG = require("../config.json");
 const Discord = require("discord.js");
+const slash = require('discord-slash-commands-v12');
 const {
 	checkJellyfinItemIDRegex
 } = require("./util");
@@ -188,8 +189,16 @@ function handleChannelMessage (message) {
 			summonMessage(message);
 			isSummendByPlay = true;
 		}
+		if(message.content==CONFIG["discord-prefix"] + "play"&&typeof playbackmanager.getcurrentPlayingPlaylist() !== 'undefined'){
+			playbackmanager.startPlaying(discordClient.user.client.voice.connections.first(), playbackmanager.getcurrentPlayingPlaylist(), 0, 0, isSummendByPlay);
+			playbackmanager.spawnPlayMessage(message);
+		}else if(typeof playbackmanager.getcurrentPlayingPlaylist() == 'undefined'){
+			const errorMessage = getDiscordEmbedError("no playlist");
+			message.channel.send(errorMessage);
+		}else if(message.content!==CONFIG["discord-prefix"] + "play"){
+			playThis(message);
+		}
 
-		playThis(message);
 	} else if (message.content.startsWith(CONFIG["discord-prefix"] + "stop")) {
 		if (isSummendByPlay) {
 			if (discordClient.user.client.voice.connections.size > 0) {
