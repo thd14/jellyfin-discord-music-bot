@@ -6,7 +6,7 @@ const {
 } = require("./util");
 
 function getProgressString (percent) {
-	const NUMBER_OF_CHARS = 25;
+	const NUMBER_OF_CHARS = 20;
 	let string = "";
 	for (let iX = 0; iX < NUMBER_OF_CHARS; iX++) {
 		if (percent > (iX) / NUMBER_OF_CHARS) {
@@ -24,7 +24,7 @@ function getProgressString (percent) {
  */
 // TODO do this with something like wcwidth
 function getMaxWidthString (string) {
-	const NUMBER_OF_CHARS = 12;
+	const NUMBER_OF_CHARS = 30;
 	if (string.length > NUMBER_OF_CHARS) {
 		return string.slice(0, NUMBER_OF_CHARS - 3) + "...";
 	}
