@@ -135,15 +135,14 @@ async function addThis (message) {
 	}
 	const itemIdDetails = await jellyfinClientManager.getJellyfinClient().getItem(jellyfinClientManager.getJellyfinClient().getCurrentUserId(), items);
 	const imageURL = await jellyfinClientManager.getJellyfinClient().getImageUrl(itemIdDetails.AlbumId || getItemId(), { type: "Primary" });
-	const album =`${jellyfinClientManager.getJellyfinClient().serverAddress()}/web/index.html#!/details?id=${itemIdDetails.AlbumId}`;
 	const reply = new Discord.MessageEmbed()
-	.setColor(getRandomDiscordColor())
+	.setColor(message.guild.me.displayHexColor)
 	.setTitle(":white_check_mark:")
 	.addFields({
 		name: `${itemIdDetails.Name}`,
 		value: `by ${itemIdDetails.Artists[0] || "VA"} `
 	})
-	.setImage(imageURL);
+	.setThumbnail(imageURL);
 	message.channel.send(reply);
 
 	playbackmanager.addTracks(items);
@@ -217,6 +216,8 @@ function handleChannelMessage (message) {
 		}
 	} else if (message.content.startsWith(CONFIG["discord-prefix"] + "add")) {
 		addThis(message);
+	}else if (message.content.startsWith(CONFIG["discord-prefix"] + "list")) {
+		playbackmanager.showList(message);
 	} else if (message.content.startsWith(CONFIG["discord-prefix"] + "spawn")) {
 		try {
 			playbackmanager.spawnPlayMessage(message);
@@ -253,6 +254,9 @@ function handleChannelMessage (message) {
 			}, {
 				name: `${CONFIG["discord-prefix"]}spawn`,
 				value: "Spawns an Interactive Play Controller"
+			}, {
+				name: `${CONFIG["discord-prefix"]}list`,
+				value: "Show the playlist"
 			}, {
 				name: `${CONFIG["discord-prefix"]}help`,
 				value: "Display this help message"

@@ -2,6 +2,7 @@
 const interactivemsghandler = require("./interactivemsghandler");
 const CONFIG = require("../config.json");
 const discordclientmanager = require("./discordclientmanager");
+const Discord = require("discord.js");
 const log = require("loglevel");
 
 const {
@@ -321,6 +322,26 @@ function getStopPayload () {
 	return payload;
 }
 
+async function showList(message){
+	let list =""
+	let i=1
+	for(const id of currentPlayingPlaylist){
+		 list= list +`${i} - `+ await getInfo(id)
+		 i++
+	}
+	const reply = new Discord.MessageEmbed()
+	.setColor(message.guild.me.displayHexColor)
+	.setTitle("<:musical_note:757938541123862638> " + "Playlist" + " <:musical_note:757938541123862638> ")
+	.setDescription( `${list} `)
+	message.channel.send(reply);
+}
+
+async function getInfo(item){
+	const itemIdDetails = await jellyfinClientManager.getJellyfinClient().getItem(jellyfinClientManager.getJellyfinClient().getCurrentUserId(), item);
+	return `${itemIdDetails.Name} by ${itemIdDetails.Artists[0] || "VA"} \n `
+}
+
+
 module.exports = {
 	startPlaying,
 	stop,
@@ -333,5 +354,6 @@ module.exports = {
 	previousTrack,
 	addTracks,
 	getPostitionTicks,
-	spawnPlayMessage
+	spawnPlayMessage,
+	showList
 };
