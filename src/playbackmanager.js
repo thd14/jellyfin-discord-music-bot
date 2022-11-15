@@ -54,7 +54,7 @@ function startPlaying (voiceconnection = discordclientmanager.getDiscordClient()
 				playMethod: getPlayMethod()
 			});
 		}
-
+		const discordClient = discordclientmanager.getDiscordClient();
 		getAudioDispatcher().on("finish", () => {
 			if (isRepeat) {
 				log.debug("repeat and sending following payload as reportPlaybackStopped to the server: ", getStopPayload());
@@ -69,8 +69,11 @@ function startPlaying (voiceconnection = discordclientmanager.getDiscordClient()
 					}
 				} else {
 					log.debug("repeat and sending following payload as reportPlaybackStopped to the server: ", getStopPayload());
-					jellyfinClientManager.getJellyfinClient().reportPlaybackStopped(getStopPayload());
-					startPlaying(voiceconnection, undefined, currentPlayingPlaylistIndex + 1, 0);
+					stop();
+					jellyfinClientManager.getJellyfinClient().closeWebSocket();
+					discordClient.user.client.voice.connections.forEach((element) => {
+						element.disconnect();
+					});
 				}
 			}
 		});
