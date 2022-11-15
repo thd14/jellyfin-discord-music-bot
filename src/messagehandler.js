@@ -192,7 +192,7 @@ function handleChannelMessage (message) {
 		if(message.content==CONFIG["discord-prefix"] + "play"&&typeof playbackmanager.getcurrentPlayingPlaylist() !== 'undefined'){
 			playbackmanager.startPlaying(discordClient.user.client.voice.connections.first(), playbackmanager.getcurrentPlayingPlaylist(), 0, 0, isSummendByPlay);
 			playbackmanager.spawnPlayMessage(message);
-		}else if(typeof playbackmanager.getcurrentPlayingPlaylist() == 'undefined'){
+		}else if(message.content==CONFIG["discord-prefix"] + "play"&& typeof playbackmanager.getcurrentPlayingPlaylist() == 'undefined'){
 			const errorMessage = getDiscordEmbedError("no playlist");
 			message.channel.send(errorMessage);
 		}else if(message.content!==CONFIG["discord-prefix"] + "play"){
@@ -277,6 +277,7 @@ function handleChannelMessage (message) {
 		/* eslint-enable quotes */
 	}
 }
+
 
 module.exports = {
 	handleChannelMessage

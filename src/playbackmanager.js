@@ -341,10 +341,7 @@ async function getInfo(item){
 	return `${itemIdDetails.Name} by ${itemIdDetails.Artists[0] || "VA"} \n `
 }
 function getcurrentPlayingPlaylist(){
-	console.log(currentPlayingPlaylist)
-	if(typeof currentPlayingPlaylist !== 'undefined'){
-		return currentPlayingPlaylist;
-	}
+	return currentPlayingPlaylist;
 }
 
 module.exports = {
