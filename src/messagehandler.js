@@ -119,14 +119,6 @@ async function playThis (message) {
 async function addThis (message) {
 	const indexOfItemID = message.content.indexOf(CONFIG["discord-prefix"] + "add") + (CONFIG["discord-prefix"] + "add").length + 1;
 	const argument = message.content.slice(indexOfItemID);
-	const reply = new Discord.MessageEmbed()
-	.setColor(getRandomDiscordColor())
-	.addFields({
-		name: `${argument} added`,
-		value: ":white_check_mark:"
-	});
-	message.channel.send(reply);
-
 	let items;
 	// check if play command was used with itemID
 	const regexresults = checkJellyfinItemIDRegex(argument);
@@ -141,6 +133,18 @@ async function addThis (message) {
 			return;
 		}
 	}
+	const itemIdDetails = await jellyfinClientManager.getJellyfinClient().getItem(jellyfinClientManager.getJellyfinClient().getCurrentUserId(), items);
+	const imageURL = await jellyfinClientManager.getJellyfinClient().getImageUrl(itemIdDetails.AlbumId || getItemId(), { type: "Primary" });
+	const album =`${jellyfinClientManager.getJellyfinClient().serverAddress()}/web/index.html#!/details?id=${itemIdDetails.AlbumId}`;
+	const reply = new Discord.MessageEmbed()
+	.setColor(getRandomDiscordColor())
+	.setTitle(":white_check_mark:")
+	.addFields({
+		name: `${itemIdDetails.Name}`,
+		value: `by ${itemIdDetails.Artists[0] || "VA"} `
+	})
+	.setImage(imageURL);
+	message.channel.send(reply);
 
 	playbackmanager.addTracks(items);
 }
