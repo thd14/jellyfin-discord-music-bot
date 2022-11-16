@@ -10,7 +10,9 @@ const {
 	setAudioDispatcher
 } = require("./dispachermanager");
 const {
-	ticksToSeconds
+	secondsToHms,
+	ticksToSeconds,
+	getDiscordEmbedError
 } = require("./util");
 
 // this whole thing should be a class but its probably too late now.
@@ -323,23 +325,38 @@ function getStopPayload () {
 }
 
 async function showList(message){
-	let list =""
-	let i=1
-	for(const id of currentPlayingPlaylist){
-		 list= list +`${i} - `+ await getInfo(id)
-		 i++
-	}
-	const reply = new Discord.MessageEmbed()
-	.setColor(message.guild.me.displayHexColor)
-	.setTitle("<:musical_note:757938541123862638> " + "Playlist" + " <:musical_note:757938541123862638> ")
-	.setDescription( `${list} `)
-	message.channel.send(reply);
+	if (typeof currentPlayingPlaylist == 'undefined') {
+		const errorMessage = getDiscordEmbedError("No playlist");
+		message.channel.send(errorMessage);
+	}else{
+		const playlist = currentPlayingPlaylist.slice(currentPlayingPlaylistIndex)
+		let list =""
+		let time = 0
+		let i=1
+		for(const id of playlist){
+			 list = list +`${i} - `+ await getInfo(id)
+			 time = time + await getDuration(id)
+			 i++
+		}
+		const reply = new Discord.MessageEmbed()
+		.setColor(message.guild.me.displayHexColor)
+		.setTitle("<:musical_note:757938541123862638> " + "Playlist" + " <:musical_note:757938541123862638> ")
+		.setDescription( `${list} `)
+		.setFooter(`total play time is : ${secondsToHms(ticksToSeconds(time))}`)
+		message.channel.send(reply);
+		}
 }
 
 async function getInfo(item){
 	const itemIdDetails = await jellyfinClientManager.getJellyfinClient().getItem(jellyfinClientManager.getJellyfinClient().getCurrentUserId(), item);
 	return `${itemIdDetails.Name} by ${itemIdDetails.Artists[0] || "VA"} \n `
 }
+
+async function getDuration(item){
+	const itemIdDetails = await jellyfinClientManager.getJellyfinClient().getItem(jellyfinClientManager.getJellyfinClient().getCurrentUserId(), item);
+	return itemIdDetails.RunTimeTicks
+}
+
 function getcurrentPlayingPlaylist(){
 	return currentPlayingPlaylist;
 }
