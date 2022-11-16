@@ -72,11 +72,8 @@ function startPlaying (voiceconnection = discordclientmanager.getDiscordClient()
 					}
 				} else {
 					log.debug("repeat and sending following payload as reportPlaybackStopped to the server: ", getStopPayload());
-					stop();
-					jellyfinClientManager.getJellyfinClient().closeWebSocket();
-					discordClient.user.client.voice.connections.forEach((element) => {
-						element.disconnect();
-					});
+					jellyfinClientManager.getJellyfinClient().reportPlaybackStopped(getStopPayload());
+					startPlaying(voiceconnection, undefined, currentPlayingPlaylistIndex + 1, 0);
 				}
 			}
 		});
@@ -347,6 +344,29 @@ async function showList(message){
 		}
 }
 
+//function from https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+function shuffle() {
+	if (typeof currentPlayingPlaylist == 'undefined') {
+		const errorMessage = getDiscordEmbedError("No playlist");
+		message.channel.send(errorMessage);
+	}else{
+		let currentIndex = currentPlayingPlaylist.length,  randomIndex;
+		
+		// While there remain elements to shuffle.
+		while (currentIndex != 0) {
+		
+		  // Pick a remaining element.
+		  randomIndex = Math.floor(Math.random() * currentIndex);
+		  currentIndex--;
+		
+		  // And swap it with the current element.
+		  [currentPlayingPlaylist[currentIndex], currentPlayingPlaylist[randomIndex]] = [
+			currentPlayingPlaylist[randomIndex], currentPlayingPlaylist[currentIndex]];
+		}
+		currentPlayingPlaylistIndex=0
+	}
+  }
+
 async function getInfo(item){
 	const itemIdDetails = await jellyfinClientManager.getJellyfinClient().getItem(jellyfinClientManager.getJellyfinClient().getCurrentUserId(), item);
 	return `${itemIdDetails.Name} by ${itemIdDetails.Artists[0] || "VA"} \n `
@@ -375,5 +395,6 @@ module.exports = {
 	getPostitionTicks,
 	spawnPlayMessage,
 	showList,
-	getcurrentPlayingPlaylist
+	getcurrentPlayingPlaylist,
+	shuffle
 };
