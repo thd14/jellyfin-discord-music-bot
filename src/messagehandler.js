@@ -240,6 +240,12 @@ function handleChannelMessage (message) {
 		.setColor(message.guild.me.displayHexColor)
 		.setTitle(":twisted_rightwards_arrows: Playlist shuffled :twisted_rightwards_arrows:")
 		message.channel.send(reply);
+	}else if (message.content.startsWith(CONFIG["discord-prefix"] + "clear")) {
+		playbackmanager.clear()
+		const reply = new Discord.MessageEmbed()
+		.setColor(message.guild.me.displayHexColor)
+		.setTitle(":no_entry_sign: Playlist cleared :no_entry_sign:")
+		message.channel.send(reply);
 	} else if (message.content.startsWith(CONFIG["discord-prefix"] + "help")) {
 		/* eslint-disable quotes */
 		const reply = new Discord.MessageEmbed()
@@ -275,6 +281,9 @@ function handleChannelMessage (message) {
 			}, {
 				name: `${CONFIG["discord-prefix"]}shuffle`,
 				value: "Shuffle the playlist"
+			}, {
+				name: `${CONFIG["discord-prefix"]}clear`,
+				value: "Empty the playlist"
 			}, {
 				name: `${CONFIG["discord-prefix"]}help`,
 				value: "Display this help message"

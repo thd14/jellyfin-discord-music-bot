@@ -367,6 +367,10 @@ function shuffle() {
 	}
   }
 
+  function clear(){
+	currentPlayingPlaylist=undefined
+  }
+
 async function getInfo(item){
 	const itemIdDetails = await jellyfinClientManager.getJellyfinClient().getItem(jellyfinClientManager.getJellyfinClient().getCurrentUserId(), item);
 	return `${itemIdDetails.Name} by ${itemIdDetails.Artists[0] || "VA"} \n `
@@ -396,5 +400,6 @@ module.exports = {
 	spawnPlayMessage,
 	showList,
 	getcurrentPlayingPlaylist,
-	shuffle
+	shuffle,
+	clear
 };
