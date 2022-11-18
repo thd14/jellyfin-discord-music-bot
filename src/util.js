@@ -34,7 +34,7 @@ function secondsToHms (totalSeconds) {
 
 function getDiscordEmbedError (e) {
 	const Discord = require("discord.js");
-	return new Discord.MessageEmbed()
+	return new Discord.EmbedBuilder()
 		.setColor(0xff0000)
 		.setTitle("Error!")
 		.setTimestamp()

@@ -324,7 +324,7 @@ function getStopPayload () {
 async function showList(message){
 	if (typeof currentPlayingPlaylist == 'undefined') {
 		const errorMessage = getDiscordEmbedError("No playlist");
-		message.channel.send(errorMessage);
+		message.channel.send({ embeds: [errorMessage] });
 	}else{
 		const playlist = currentPlayingPlaylist.slice(currentPlayingPlaylistIndex)
 		let list =""
@@ -335,12 +335,12 @@ async function showList(message){
 			 time = time + await getDuration(id)
 			 i++
 		}
-		const reply = new Discord.MessageEmbed()
-		.setColor(message.guild.me.displayHexColor)
+		const reply = new Discord.EmbedBuilder()
+		.setColor(message.guild.members.me.displayHexColor)
 		.setTitle("<:musical_note:757938541123862638> " + "Playlist" + " <:musical_note:757938541123862638> ")
 		.setDescription( `${list} `)
-		.setFooter(`total play time is : ${secondsToHms(ticksToSeconds(time))}`)
-		message.channel.send(reply);
+		.setFooter({ text: `total play time is : ${secondsToHms(ticksToSeconds(time))}`})
+		message.channel.send({ embeds: [reply] });
 		}
 }
 
@@ -348,7 +348,7 @@ async function showList(message){
 function shuffle() {
 	if (typeof currentPlayingPlaylist == 'undefined') {
 		const errorMessage = getDiscordEmbedError("No playlist");
-		message.channel.send(errorMessage);
+		message.channel.send({ embeds: [errorMessage] });
 	}else{
 		let currentIndex = currentPlayingPlaylist.length,  randomIndex;
 		

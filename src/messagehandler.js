@@ -1,5 +1,6 @@
 const CONFIG = require("../config.json");
 const Discord = require("discord.js");
+const DiscordVoice = require('@discordjs/voice');
 const {
 	checkJellyfinItemIDRegex
 } = require("./util");
@@ -84,12 +85,12 @@ function summonMessage (message) {
 
 		summon(message.member.voice.channel);
 
-		const vcJoin = new Discord.MessageEmbed()
+		const vcJoin = new Discord.EmbedBuilder()
 			.setColor(getRandomDiscordColor())
 			.setTitle("Joined Channel")
 			.setTimestamp()
 			.setDescription("<:loudspeaker:757929476993581117> " + desc);
-		message.channel.send(vcJoin);
+		message.channel.send({ embeds: [vcJoin] });
 	}
 }
 
@@ -106,7 +107,7 @@ async function playThis (message) {
 			items = await searchForItemID(argument);
 		} catch (e) {
 			const noSong = getDiscordEmbedError("No song");
-			message.channel.send(noSong);
+			message.channel.send({ embeds: [noSong] });
 			playbackmanager.stop(isSummendByPlay ? discordClient.user.client.voice.connections.first() : undefined);
 			return;
 		}
@@ -129,7 +130,7 @@ async function addThis (message) {
 			items = await searchForItemID(argument);
 		} catch (e) {
 			const noSong = getDiscordEmbedError("No song");
-			message.channel.send(noSong);
+			message.channel.send({ embeds: [noSong] });
 			return;
 		}
 	}
@@ -142,22 +143,22 @@ async function addThis (message) {
 		 i++
 	}
 	if (items.length==1){
-		const reply = new Discord.MessageEmbed()
-		.setColor(message.guild.me.displayHexColor)
+		const reply = new Discord.EmbedBuilder()
+		.setColor(message.guild.members.me.displayHexColor)
 		.setTitle(":white_check_mark:")
 		.addFields({
 			name: `${itemIdDetails.Name}`,
 			value: `by ${itemIdDetails.Artists[0] || "VA"} `
 		})
 		.setThumbnail(imageURL);
-		message.channel.send(reply);
+		message.channel.send({ embeds: [reply] });
 	}else{
-		const reply = new Discord.MessageEmbed()
-		.setColor(message.guild.me.displayHexColor)
+		const reply = new Discord.EmbedBuilder()
+		.setColor(message.guild.members.me.displayHexColor)
 		.setTitle(":white_check_mark:")
 		.setDescription(`${list}`)
 		.setThumbnail(imageURL);
-		message.channel.send(reply);
+		message.channel.send({ embeds: [reply] });
 	}
 	playbackmanager.addTracks(items);
 
@@ -230,26 +231,26 @@ function handleChannelMessage (message) {
 		});
 		var desc = "**Left Voice Channel** `";
 		desc = desc.concat(message.member.voice.channel.name).concat("`");
-		const vcJoin = new Discord.MessageEmbed()
+		const vcJoin = new Discord.EmbedBuilder()
 			.setColor(getRandomDiscordColor())
 			.setTitle("Left Channel")
 			.setTimestamp()
 			.setDescription("<:wave:757938481585586226> " + desc);
-		message.channel.send(vcJoin);
+		message.channel.send({ embeds: [vcJoin] });
 	} else if ((message.content.startsWith(CONFIG["discord-prefix"] + "pause")) || (message.content.startsWith(CONFIG["discord-prefix"] + "resume"))) {
 		try {
 			playbackmanager.playPause();
-			const noPlay = new Discord.MessageEmbed()
+			const noPlay = new Discord.EmbedBuilder()
 				.setColor(0xff0000)
 				.setTitle("<:play_pause:757940598106882049> " + "Paused/Resumed.")
 				.setTimestamp();
-			message.channel.send(noPlay);
+			message.channel.send({ embeds: [noPlay] });
 		} catch (error) {
 			const errorMessage = getDiscordEmbedError(error);
-			message.channel.send(errorMessage);
+			message.channel.send({ embeds: [errorMessage] });
 		}
 	} else if (message.content.startsWith(CONFIG["discord-prefix"] + "play")) {
-		if (discordClient.user.client.voice.connections.size < 1) {
+		if (discordClient.client.voice.connections.size < 1) {
 			summonMessage(message);
 			isSummendByPlay = true;
 		}
@@ -258,7 +259,7 @@ function handleChannelMessage (message) {
 			playbackmanager.spawnPlayMessage(message);
 		}else if(message.content==CONFIG["discord-prefix"] + "play"&& typeof playbackmanager.getcurrentPlayingPlaylist() == 'undefined'){
 			const errorMessage = getDiscordEmbedError("no playlist");
-			message.channel.send(errorMessage);
+			message.channel.send({ embeds: [errorMessage] });
 		}else if(message.content!==CONFIG["discord-prefix"] + "play"){
 			playThis(message);
 		}
@@ -278,14 +279,14 @@ function handleChannelMessage (message) {
 			playbackmanager.seek(hmsToSeconds(argument) * 10000000);
 		} catch (error) {
 			const errorMessage = getDiscordEmbedError(error);
-			message.channel.send(errorMessage);
+			message.channel.send({ embeds: [errorMessage] });
 		}
 	} else if (message.content.startsWith(CONFIG["discord-prefix"] + "skip") || message.content.startsWith(CONFIG["discord-prefix"] + "next")) {
 		try {
 			playbackmanager.nextTrack();
 		} catch (error) {
 			const errorMessage = getDiscordEmbedError(error);
-			message.channel.send(errorMessage);
+			message.channel.send({ embeds: [errorMessage] });
 		}
 	} else if (message.content.startsWith(CONFIG["discord-prefix"] + "add")) {
 		addThis(message);
@@ -296,20 +297,20 @@ function handleChannelMessage (message) {
 			playbackmanager.spawnPlayMessage(message);
 		} catch (error) {
 			const errorMessage = getDiscordEmbedError(error);
-			message.channel.send(errorMessage);
+			message.channel.send({ embeds: [errorMessage] });
 		}
 	}else if (message.content.startsWith(CONFIG["discord-prefix"] + "shuffle")) {
 		playbackmanager.shuffle()
-		const reply = new Discord.MessageEmbed()
-		.setColor(message.guild.me.displayHexColor)
+		const reply = new Discord.EmbedBuilder()
+		.setColor(message.guild.members.me.displayHexColor)
 		.setTitle(":twisted_rightwards_arrows: Playlist shuffled :twisted_rightwards_arrows:")
-		message.channel.send(reply);
+		message.channel.send({ embeds: [reply] });
 	}else if (message.content.startsWith(CONFIG["discord-prefix"] + "clear")) {
 		playbackmanager.clear()
-		const reply = new Discord.MessageEmbed()
-		.setColor(message.guild.me.displayHexColor)
+		const reply = new Discord.EmbedBuilder()
+		.setColor(message.guild.members.me.displayHexColor)
 		.setTitle(":no_entry_sign: Playlist cleared :no_entry_sign:")
-		message.channel.send(reply);
+		message.channel.send({ embeds: [reply] });
 	} else if (message.content.startsWith(CONFIG["discord-prefix"] + "help")) {
 		helpMessage(message.channel)
 	}
