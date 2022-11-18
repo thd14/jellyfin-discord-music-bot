@@ -106,7 +106,7 @@ async function playThis (message) {
 		try {
 			items = await searchForItemID(argument);
 		} catch (e) {
-			const noSong = getDiscordEmbedError(e);
+			const noSong = getDiscordEmbedError("No song");
 			message.channel.send(noSong);
 			playbackmanager.stop(isSummendByPlay ? discordClient.user.client.voice.connections.first() : undefined);
 			return;
@@ -129,24 +129,39 @@ async function addThis (message) {
 		try {
 			items = await searchForItemID(argument);
 		} catch (e) {
-			const noSong = getDiscordEmbedError(e);
+			const noSong = getDiscordEmbedError("No song");
 			message.channel.send(noSong);
 			return;
 		}
 	}
-	const itemIdDetails = await jellyfinClientManager.getJellyfinClient().getItem(jellyfinClientManager.getJellyfinClient().getCurrentUserId(), items);
+	const itemIdDetails = await jellyfinClientManager.getJellyfinClient().getItem(jellyfinClientManager.getJellyfinClient().getCurrentUserId(), items[0]);
 	const imageURL = await jellyfinClientManager.getJellyfinClient().getImageUrl(itemIdDetails.AlbumId || getItemId(), { type: "Primary" });
-	const reply = new Discord.MessageEmbed()
-	.setColor(message.guild.me.displayHexColor)
-	.setTitle(":white_check_mark:")
-	.addFields({
-		name: `${itemIdDetails.Name}`,
-		value: `by ${itemIdDetails.Artists[0] || "VA"} `
-	})
-	.setThumbnail(imageURL);
-	message.channel.send(reply);
-
+	let list =""
+	let i=1
+	for(const id of items){
+		 list = list +`${i} - `+ await playbackmanager.getInfo(id)
+		 i++
+	}
+	if (items.length==1){
+		const reply = new Discord.MessageEmbed()
+		.setColor(message.guild.me.displayHexColor)
+		.setTitle(":white_check_mark:")
+		.addFields({
+			name: `${itemIdDetails.Name}`,
+			value: `by ${itemIdDetails.Artists[0] || "VA"} `
+		})
+		.setThumbnail(imageURL);
+		message.channel.send(reply);
+	}else{
+		const reply = new Discord.MessageEmbed()
+		.setColor(message.guild.me.displayHexColor)
+		.setTitle(":white_check_mark:")
+		.setDescription(`${list}`)
+		.setThumbnail(imageURL);
+		message.channel.send(reply);
+	}
 	playbackmanager.addTracks(items);
+
 }
 
 function handleChannelMessage (message) {

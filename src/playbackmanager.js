@@ -401,5 +401,6 @@ module.exports = {
 	showList,
 	getcurrentPlayingPlaylist,
 	shuffle,
-	clear
+	clear,
+	getInfo
 };
