@@ -1,6 +1,5 @@
 const CONFIG = require("../config.json");
 const Discord = require("discord.js");
-const slash = require('discord-slash-commands-v12');
 const {
 	checkJellyfinItemIDRegex
 } = require("./util");
