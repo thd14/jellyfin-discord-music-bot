@@ -163,7 +163,59 @@ async function addThis (message) {
 
 }
 
+
+function helpMessage(channel){
+	/* eslint-disable quotes */
+	const reply = new Discord.EmbedBuilder()
+	.setColor(getRandomDiscordColor())
+	.setTitle("<:musical_note:757938541123862638> " + "Jellyfin Discord Music Bot" + " <:musical_note:757938541123862638> ")
+	.addFields({
+		name: `${CONFIG["discord-prefix"]}summon`,
+		value: "Join the channel the author of the message"
+	}, {
+		name: `${CONFIG["discord-prefix"]}disconnect`,
+		value: "Disconnect from all current Voice Channels"
+	}, {
+		name: `${CONFIG["discord-prefix"]}play`,
+		value: "Play the following item"
+	}, {
+		name: `${CONFIG["discord-prefix"]}add`,
+		value: "Add the following item to the current playlist"
+	}, {
+		name: `${CONFIG["discord-prefix"]}pause/resume`,
+		value: "Pause/Resume audio"
+	}, {
+		name: `${CONFIG["discord-prefix"]}seek`,
+		value: "Where to Seek to in seconds or MM:SS"
+	}, {
+		name: `${CONFIG["discord-prefix"]}skip and ${CONFIG["discord-prefix"]}next`,
+		value: "Skip this Song"
+	}, {
+		name: `${CONFIG["discord-prefix"]}spawn`,
+		value: "Spawns an Interactive Play Controller"
+	}, {
+		name: `${CONFIG["discord-prefix"]}list`,
+		value: "Show the playlist"
+	}, {
+		name: `${CONFIG["discord-prefix"]}shuffle`,
+		value: "Shuffle the playlist"
+	}, {
+		name: `${CONFIG["discord-prefix"]}clear`,
+		value: "Empty the playlist"
+	}, {
+		name: `${CONFIG["discord-prefix"]}help`,
+		value: "Display this help message"
+	}, {
+		name: `GitHub`,
+		value: "Find the code for this bot at: https://github.com/KGT1/jellyfin-discord-music-bot"
+	});
+	channel.send({ embeds: [reply] });
+/* eslint-enable quotes */
+}
+
 function handleChannelMessage (message) {
+	console.log(message)
+
 	getRandomDiscordColor();
 
 	if (message.content.startsWith(CONFIG["discord-prefix"] + "summon")) {
@@ -261,56 +313,12 @@ function handleChannelMessage (message) {
 		.setTitle(":no_entry_sign: Playlist cleared :no_entry_sign:")
 		message.channel.send(reply);
 	} else if (message.content.startsWith(CONFIG["discord-prefix"] + "help")) {
-		/* eslint-disable quotes */
-		const reply = new Discord.MessageEmbed()
-			.setColor(getRandomDiscordColor())
-			.setTitle("<:musical_note:757938541123862638> " + "Jellyfin Discord Music Bot" + " <:musical_note:757938541123862638> ")
-			.addFields({
-				name: `${CONFIG["discord-prefix"]}summon`,
-				value: "Join the channel the author of the message"
-			}, {
-				name: `${CONFIG["discord-prefix"]}disconnect`,
-				value: "Disconnect from all current Voice Channels"
-			}, {
-				name: `${CONFIG["discord-prefix"]}play`,
-				value: "Play the following item"
-			}, {
-				name: `${CONFIG["discord-prefix"]}add`,
-				value: "Add the following item to the current playlist"
-			}, {
-				name: `${CONFIG["discord-prefix"]}pause/resume`,
-				value: "Pause/Resume audio"
-			}, {
-				name: `${CONFIG["discord-prefix"]}seek`,
-				value: "Where to Seek to in seconds or MM:SS"
-			}, {
-				name: `${CONFIG["discord-prefix"]}skip and ${CONFIG["discord-prefix"]}next`,
-				value: "Skip this Song"
-			}, {
-				name: `${CONFIG["discord-prefix"]}spawn`,
-				value: "Spawns an Interactive Play Controller"
-			}, {
-				name: `${CONFIG["discord-prefix"]}list`,
-				value: "Show the playlist"
-			}, {
-				name: `${CONFIG["discord-prefix"]}shuffle`,
-				value: "Shuffle the playlist"
-			}, {
-				name: `${CONFIG["discord-prefix"]}clear`,
-				value: "Empty the playlist"
-			}, {
-				name: `${CONFIG["discord-prefix"]}help`,
-				value: "Display this help message"
-			}, {
-				name: `GitHub`,
-				value: "Find the code for this bot at: https://github.com/KGT1/jellyfin-discord-music-bot"
-			});
-		message.channel.send(reply);
-		/* eslint-enable quotes */
+		helpMessage(message.channel)
 	}
 }
 
 
 module.exports = {
-	handleChannelMessage
+	handleChannelMessage,
+	helpMessage
 };
