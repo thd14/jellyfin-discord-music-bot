@@ -214,8 +214,6 @@ function helpMessage(channel){
 }
 
 function handleChannelMessage (message) {
-	console.log(message)
-
 	getRandomDiscordColor();
 
 	if (message.content.startsWith(CONFIG["discord-prefix"] + "summon")) {

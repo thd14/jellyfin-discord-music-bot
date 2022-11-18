@@ -65,7 +65,7 @@ try {
     });
 	
 
-	discordClient.on("message", (message) => {
+	discordClient.on(Discord.Events.MessageCreate, (message) => {
 		handleChannelMessage(message);
 	});
 	
