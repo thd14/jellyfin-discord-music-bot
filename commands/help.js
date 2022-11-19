@@ -6,6 +6,7 @@ module.exports = {
 		.setName('help')
 		.setDescription('Show comande list'),
 	async execute(interaction) {
-		helpMessage(interaction.channel);
+		reply = helpMessage();
+		await interaction.reply({ embeds: [reply] });
 	},
 };

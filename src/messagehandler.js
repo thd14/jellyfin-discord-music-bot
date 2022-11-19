@@ -1,12 +1,11 @@
 const CONFIG = require("../config.json");
 const Discord = require("discord.js");
 const {
-	checkJellyfinItemIDRegex
-} = require("./util");
-const {
+	checkJellyfinItemIDRegex,
 	hmsToSeconds,
 	getDiscordEmbedError
 } = require("./util");
+
 const DiscordVoice = require('@discordjs/voice');
 
 const discordclientmanager = require("./discordclientmanager");
@@ -163,7 +162,7 @@ async function addThis (message) {
 }
 
 
-function helpMessage(channel){
+function helpMessage(){
 	/* eslint-disable quotes */
 	const reply = new Discord.EmbedBuilder()
 	.setColor(getRandomDiscordColor())
@@ -208,11 +207,11 @@ function helpMessage(channel){
 		name: `GitHub`,
 		value: "Find the code for this bot at: https://github.com/KGT1/jellyfin-discord-music-bot"
 	});
-	channel.send({ embeds: [reply] });
+	return reply
 /* eslint-enable quotes */
 }
 
-function handleChannelMessage (message) {
+async function handleChannelMessage (message) {
 	getRandomDiscordColor();
 
 	if (message.content.startsWith(CONFIG["discord-prefix"] + "summon")) {
@@ -285,8 +284,9 @@ function handleChannelMessage (message) {
 		}
 	} else if (message.content.startsWith(CONFIG["discord-prefix"] + "add")) {
 		addThis(message);
-	}else if (message.content.startsWith(CONFIG["discord-prefix"] + "list")) {
-		playbackmanager.showList(message);
+	} else if (message.content.startsWith(CONFIG["discord-prefix"] + "list")) {
+		const reply = await playbackmanager.makeList(message);
+		message.channel.send({ embeds: [reply] });
 	} else if (message.content.startsWith(CONFIG["discord-prefix"] + "spawn")) {
 		try {
 			playbackmanager.spawnPlayMessage(message);
@@ -294,20 +294,26 @@ function handleChannelMessage (message) {
 			const errorMessage = getDiscordEmbedError(error);
 			message.channel.send({ embeds: [errorMessage] });
 		}
-	}else if (message.content.startsWith(CONFIG["discord-prefix"] + "shuffle")) {
+	} else if (message.content.startsWith(CONFIG["discord-prefix"] + "shuffle")) {
 		playbackmanager.shuffle()
-		const reply = new Discord.EmbedBuilder()
-		.setColor(message.guild.members.me.displayHexColor)
-		.setTitle(":twisted_rightwards_arrows: Playlist shuffled :twisted_rightwards_arrows:")
+		if (typeof playbackmanager.getcurrentPlayingPlaylist() == 'undefined') {
+			const reply = getDiscordEmbedError("No playlist");
+			
+		}else{
+			const reply = new Discord.EmbedBuilder()
+			.setColor(message.guild.members.me.displayHexColor)
+			.setTitle(":twisted_rightwards_arrows: Playlist shuffled :twisted_rightwards_arrows:")
+		}
 		message.channel.send({ embeds: [reply] });
-	}else if (message.content.startsWith(CONFIG["discord-prefix"] + "clear")) {
+	} else if (message.content.startsWith(CONFIG["discord-prefix"] + "clear")) {
 		playbackmanager.clear()
 		const reply = new Discord.EmbedBuilder()
 		.setColor(message.guild.members.me.displayHexColor)
 		.setTitle(":no_entry_sign: Playlist cleared :no_entry_sign:")
 		message.channel.send({ embeds: [reply] });
 	} else if (message.content.startsWith(CONFIG["discord-prefix"] + "help")) {
-		helpMessage(message.channel)
+		reply=helpMessage()
+		message.channel.send({ embeds: [reply] });
 	}
 }
 

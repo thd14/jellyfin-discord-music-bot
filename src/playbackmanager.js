@@ -316,10 +316,10 @@ function getStopPayload () {
 	return payload;
 }
 
-async function showList(message){
+async function makeList(message){
 	if (typeof currentPlayingPlaylist == 'undefined') {
 		const errorMessage = getDiscordEmbedError("No playlist");
-		message.channel.send({ embeds: [errorMessage] });
+		return errorMessage
 	}else{
 		const playlist = currentPlayingPlaylist.slice(currentPlayingPlaylistIndex)
 		let list =""
@@ -335,16 +335,13 @@ async function showList(message){
 		.setTitle("<:musical_note:757938541123862638> " + "Playlist" + " <:musical_note:757938541123862638> ")
 		.setDescription( `${list} `)
 		.setFooter({ text: `total play time is : ${secondsToHms(ticksToSeconds(time))}`})
-		message.channel.send({ embeds: [reply] });
+		return reply
 		}
-}
+	}
 
 //function from https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 function shuffle() {
-	if (typeof currentPlayingPlaylist == 'undefined') {
-		const errorMessage = getDiscordEmbedError("No playlist");
-		message.channel.send({ embeds: [errorMessage] });
-	}else{
+	if (currentPlayingPlaylist != undefined){
 		let currentIndex = currentPlayingPlaylist.length,  randomIndex;
 		
 		// While there remain elements to shuffle.
@@ -401,7 +398,7 @@ module.exports = {
 	addTracks,
 	getPostitionTicks,
 	spawnPlayMessage,
-	showList,
+	makeList,
 	getcurrentPlayingPlaylist,
 	shuffle,
 	clear,
