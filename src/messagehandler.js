@@ -224,9 +224,6 @@ function handleChannelMessage (message) {
 	} else if (message.content.startsWith(CONFIG["discord-prefix"] + "disconnect")) {
 		playbackmanager.stop();
 		jellyfinClientManager.getJellyfinClient().closeWebSocket();
-		discordClient.user.client.voice.connections.forEach((element) => {
-			element.disconnect();
-		});
 		var desc = "**Left Voice Channel** `";
 		desc = desc.concat(message.member.voice.channel.name).concat("`");
 		const vcJoin = new Discord.EmbedBuilder()

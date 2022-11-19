@@ -47,24 +47,22 @@ function startPlaying (voiceconnection = player, itemIDPlaylist = currentPlaying
 	_seek = seekTo * 1000;
 	updatePlayMessage();
 	async function playasync () {
-		const url = streamURLbuilder(itemIDPlaylist[playlistIndex], 600);
+		const url = streamURLbuilder(itemIDPlaylist[playlistIndex], 60000000);
 		let resource = DiscordVoice.createAudioResource(url, {
 			inlineVolume: true
 		})
 		connection.subscribe(player)
 		player.play(resource)
 		const discordClient = discordclientmanager.getDiscordClient();
-		player.on("finish", () => {
+		player.on(DiscordVoice.AudioPlayerStatus.Idle, () => {
 			if (isRepeat) {
 				log.debug("repeat and sending following payload as reportPlaybackStopped to the server: ", getStopPayload());
 				jellyfinClientManager.getJellyfinClient().reportPlaybackStopped(getStopPayload());
 				startPlaying(player, undefined, currentPlayingPlaylistIndex, 0);
 			} else {
-				if (currentPlayingPlaylist.length < playlistIndex) {
+				if (currentPlayingPlaylist == undefined || currentPlayingPlaylist.length < playlistIndex) {
 					if (disconnectOnFinish) {
-						stop(player, currentPlayingPlaylist[playlistIndex - 1]);
-					} else {
-						stop(undefined, currentPlayingPlaylist[playlistIndex - 1]);
+						stop();
 					}
 				} else {
 					log.debug("repeat and sending following payload as reportPlaybackStopped to the server: ", getStopPayload());
@@ -169,14 +167,15 @@ function previousTrack () {
 /**
  * @param {Object=} disconnectVoiceConnection - Optional The voice Connection do disconnect from
  */
-function stop (disconnectVoiceConnection, itemId = getItemId()) {
+function stop (itemId = getItemId()) {
 	isPaused = true;
 	if (interactivemsghandler.hasMessage()) {
 		interactivemsghandler.destroy();
 	}
-	if (disconnectVoiceConnection) {
-		disconnectVoiceConnection.stop();
+	if(player != undefined){
+		player.stop();
 	}
+	connection.destroy();
 	log.debug("stop playback and send following payload as reportPlaybackStopped to the server: ", getStopPayload());
 	jellyfinClientManager.getJellyfinClient().reportPlaybackStopped(getStopPayload());
 	if (getAudioDispatcher()) {
