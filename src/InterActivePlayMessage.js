@@ -50,7 +50,7 @@ class InterActivePlayMessage {
 	 */
 	constructor (message, title, artist, imageURL, itemURL, ticksLength, onPrevious, onPausePlay, onStop, onNext, onRepeat, playlistLenth) {
 		this.ticksLength = ticksLength;
-		var exampleEmbed = {
+		var playerMessage = {
 			color: 0x0099ff,
 			title: "Now Playing",
 			url: itemURL,
@@ -62,30 +62,22 @@ class InterActivePlayMessage {
 			timestamp: new Date()
 		};
 		if (typeof CONFIG["interactive-seek-bar-update-intervall"] === "number") {
-			exampleEmbed.fields.push({
+			playerMessage.fields.push({
 				name: getProgressString(0 / this.ticksLength),
 				value: `${secondsToHms(0)} / ${secondsToHms(ticksToSeconds(this.ticksLength))}`,
 				inline: false
 			});
 		}
 		if (playlistLenth) {
-			exampleEmbed.fields.push({
+			playerMessage.fields.push({
 				name: `1 of ${playlistLenth}`,
 				value: "Playlist",
 				inline: false
 			});
 		}
-		message.channel.send({
-			embed: exampleEmbed
-		})
-			.then((val) => {
-				this.musicplayermessage = val;
-				val.react("⏮️");
-				val.react("⏯️");
-				val.react("⏹️");
-				val.react("⏭️");
-				val.react("🔁");
-			}).catch(console.error);
+		console.log(playerMessage);
+		//message.channel.send({embed: playerMessage})
+			
 
 		function reactionchange (reaction, user, musicplayermessage) {
 			if (reaction.message.id === musicplayermessage.id && !(user.bot)) {
@@ -159,8 +151,8 @@ class InterActivePlayMessage {
 	}
 
 	destroy () {
-		this.musicplayermessage.delete();
-		delete this;
+		//this.musicplayermessage.delete();
+		//delete this;
 	}
 }
 

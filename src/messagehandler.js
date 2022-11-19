@@ -1,6 +1,5 @@
 const CONFIG = require("../config.json");
 const Discord = require("discord.js");
-const DiscordVoice = require('@discordjs/voice');
 const {
 	checkJellyfinItemIDRegex
 } = require("./util");
@@ -8,6 +7,7 @@ const {
 	hmsToSeconds,
 	getDiscordEmbedError
 } = require("./util");
+const DiscordVoice = require('@discordjs/voice');
 
 const discordclientmanager = require("./discordclientmanager");
 const jellyfinClientManager = require("./jellyfinclientmanager");
@@ -70,9 +70,6 @@ async function searchForItemID (searchString) {
 	}
 }
 
-function summon (voiceChannel) {
-	voiceChannel.join();
-}
 
 function summonMessage (message) {
 	if (!message.member.voice.channel) {
@@ -83,7 +80,7 @@ function summonMessage (message) {
 		var desc = "**Joined Voice Channel** `";
 		desc = desc.concat(message.member.voice.channel.name).concat("`");
 
-		summon(message.member.voice.channel);
+		playbackmanager.summon(message.member.voice.channel);
 
 		const vcJoin = new Discord.EmbedBuilder()
 			.setColor(getRandomDiscordColor())
@@ -97,6 +94,7 @@ function summonMessage (message) {
 async function playThis (message) {
 	const indexOfItemID = message.content.indexOf(CONFIG["discord-prefix"] + "play") + (CONFIG["discord-prefix"] + "play").length + 1;
 	const argument = message.content.slice(indexOfItemID);
+	const player = new DiscordVoice.createAudioPlayer();
 	let items;
 	// check if play command was used with itemID
 	const regexresults = checkJellyfinItemIDRegex(argument);
@@ -108,12 +106,12 @@ async function playThis (message) {
 		} catch (e) {
 			const noSong = getDiscordEmbedError("No song");
 			message.channel.send({ embeds: [noSong] });
-			playbackmanager.stop(isSummendByPlay ? discordClient.user.client.voice.connections.first() : undefined);
+			playbackmanager.stop(player);
 			return;
 		}
 	}
 
-	playbackmanager.startPlaying(discordClient.user.client.voice.connections.first(), items, 0, 0, isSummendByPlay);
+	playbackmanager.startPlaying(player, items, 0, 0, isSummendByPlay);
 	playbackmanager.spawnPlayMessage(message);
 }
 
@@ -250,7 +248,7 @@ function handleChannelMessage (message) {
 			message.channel.send({ embeds: [errorMessage] });
 		}
 	} else if (message.content.startsWith(CONFIG["discord-prefix"] + "play")) {
-		if (discordClient.client.voice.connections.size < 1) {
+		if (DiscordVoice.getVoiceConnection(message.channel.guild.id) == undefined) {
 			summonMessage(message);
 			isSummendByPlay = true;
 		}

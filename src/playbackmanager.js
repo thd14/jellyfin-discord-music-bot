@@ -4,6 +4,8 @@ const CONFIG = require("../config.json");
 const discordclientmanager = require("./discordclientmanager");
 const Discord = require("discord.js");
 const log = require("loglevel");
+const DiscordVoice = require('@discordjs/voice');
+
 
 const {
 	getAudioDispatcher,
@@ -23,17 +25,20 @@ var isPaused;
 var isRepeat;
 var _disconnectOnFinish;
 var _seek;
+var player;
+var connection;
 
 const jellyfinClientManager = require("./jellyfinclientmanager");
 
 function streamURLbuilder (itemID, bitrate) {
 	// so the server transcodes. Seems appropriate as it has the source file.(doesnt yet work i dont know why)
-	const supportedCodecs = "opus";
-	const supportedContainers = "ogg,opus";
+	const supportedCodecs = "opus,flac";
+	const supportedContainers = "ogg,opus,flac";
 	return `${jellyfinClientManager.getJellyfinClient().serverAddress()}/Audio/${itemID}/universal?UserId=${jellyfinClientManager.getJellyfinClient().getCurrentUserId()}&DeviceId=${jellyfinClientManager.getJellyfinClient().deviceId()}&MaxStreamingBitrate=${bitrate}&Container=${supportedContainers}&AudioCodec=${supportedCodecs}&api_key=${jellyfinClientManager.getJellyfinClient().accessToken()}&TranscodingContainer=ts&TranscodingProtocol=hls`;
 }
 
-function startPlaying (voiceconnection = discordclientmanager.getDiscordClient().user.client.voice.connections.first(), itemIDPlaylist = currentPlayingPlaylist, playlistIndex = currentPlayingPlaylistIndex, seekTo, disconnectOnFinish = _disconnectOnFinish) {
+function startPlaying (voiceconnection = player, itemIDPlaylist = currentPlayingPlaylist, playlistIndex = currentPlayingPlaylistIndex, seekTo, disconnectOnFinish = _disconnectOnFinish) {
+	player=voiceconnection
 	log.debug("start playing ", playlistIndex, ". of list: ", itemIDPlaylist, " in a voiceconnection?: ", typeof voiceconnection !== "undefined");
 	isPaused = false;
 	currentPlayingPlaylist = itemIDPlaylist;
@@ -42,31 +47,22 @@ function startPlaying (voiceconnection = discordclientmanager.getDiscordClient()
 	_seek = seekTo * 1000;
 	updatePlayMessage();
 	async function playasync () {
-		const url = streamURLbuilder(itemIDPlaylist[playlistIndex], voiceconnection.channel.bitrate);
-		setAudioDispatcher(voiceconnection.play(url, {
-			seek: seekTo
-		}));
-		if (seekTo) {
-			jellyfinClientManager.getJellyfinClient().reportPlaybackProgress(getProgressPayload());
-		} else {
-			jellyfinClientManager.getJellyfinClient().reportPlaybackStart({
-				userID: `${jellyfinClientManager.getJellyfinClient().getCurrentUserId()}`,
-				itemID: `${itemIDPlaylist[playlistIndex]}`,
-				canSeek: true,
-				playSessionId: getPlaySessionId(),
-				playMethod: getPlayMethod()
-			});
-		}
+		const url = streamURLbuilder(itemIDPlaylist[playlistIndex], 600);
+		let resource = DiscordVoice.createAudioResource(url, {
+			inlineVolume: true
+		})
+		connection.subscribe(player)
+		player.play(resource)
 		const discordClient = discordclientmanager.getDiscordClient();
-		getAudioDispatcher().on("finish", () => {
+		player.on("finish", () => {
 			if (isRepeat) {
 				log.debug("repeat and sending following payload as reportPlaybackStopped to the server: ", getStopPayload());
 				jellyfinClientManager.getJellyfinClient().reportPlaybackStopped(getStopPayload());
-				startPlaying(voiceconnection, undefined, currentPlayingPlaylistIndex, 0);
+				startPlaying(player, undefined, currentPlayingPlaylistIndex, 0);
 			} else {
 				if (currentPlayingPlaylist.length < playlistIndex) {
 					if (disconnectOnFinish) {
-						stop(voiceconnection, currentPlayingPlaylist[playlistIndex - 1]);
+						stop(player, currentPlayingPlaylist[playlistIndex - 1]);
 					} else {
 						stop(undefined, currentPlayingPlaylist[playlistIndex - 1]);
 					}
@@ -179,7 +175,7 @@ function stop (disconnectVoiceConnection, itemId = getItemId()) {
 		interactivemsghandler.destroy();
 	}
 	if (disconnectVoiceConnection) {
-		disconnectVoiceConnection.disconnect();
+		disconnectVoiceConnection.stop();
 	}
 	log.debug("stop playback and send following payload as reportPlaybackStopped to the server: ", getStopPayload());
 	jellyfinClientManager.getJellyfinClient().reportPlaybackStopped(getStopPayload());
@@ -220,7 +216,7 @@ function playPause () {
 
 function getPostitionTicks () {
 	// this is very sketchy but i dont know how else to do it
-	return (_seek + getAudioDispatcher().streamTime - getAudioDispatcher().pausedTime) * 10000;
+	return 1//(_seek + getAudioDispatcher().streamTime - getAudioDispatcher().pausedTime) * 10000;
 }
 
 function getPlayMethod () {
@@ -385,6 +381,14 @@ function getcurrentPlayingPlaylist(){
 	return currentPlayingPlaylist;
 }
 
+function summon (channel) {
+	connection = DiscordVoice.joinVoiceChannel({	channelId : channel.id,
+		guildId : channel.guild.id,
+		adapterCreator : channel.guild.voiceAdapterCreator,
+		selfDeaf: false,
+		selfMute: false,})
+}
+
 module.exports = {
 	startPlaying,
 	stop,
@@ -402,5 +406,6 @@ module.exports = {
 	getcurrentPlayingPlaylist,
 	shuffle,
 	clear,
-	getInfo
+	getInfo,
+	summon
 };
